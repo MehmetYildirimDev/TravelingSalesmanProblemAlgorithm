@@ -17,11 +17,11 @@ namespace NearestNeighbor
             List<Tuple<double, double>> cities = new List<Tuple<double, double>>();
 
             //5 124 1000 5915 11849 85900
-            string dosya_yolu = @"D:\Üniversite\3.SINIF\2. Dönem\Algoritma Analizi ve Tasarımı\Ödev 1\uygulama dosyaları\5";
+            string dosya_yolu = @"D:\Üniversite\3.SINIF\2. Dönem\Algoritma Analizi ve Tasarımı\Ödev 1\uygulama dosyaları\85900";
 
             string[] lines = System.IO.File.ReadAllLines(dosya_yolu);
 
-            double pathLenght=0;
+            double pathLenght = 0;
 
             for (int i = 1; i < lines.Length; i++)
             {
@@ -31,7 +31,7 @@ namespace NearestNeighbor
 
             int startCity = 0;
 
-            int[] tour = new int[cities.Count];
+            int[] tour = new int[cities.Count+1];//en bastaki sehre dondugu icin +1
             bool[] visited = new bool[cities.Count];
 
             visited[startCity] = true;
@@ -54,7 +54,7 @@ namespace NearestNeighbor
                             nearestCity = j;
                             pathLenght += nearestDistance;
                         }
-                        
+
                     }
                 }
 
@@ -63,8 +63,10 @@ namespace NearestNeighbor
 
             }
 
-
-            
+            //baslangic noktasina dönme
+            double returnValue = Distance(cities[startCity], cities[tour.Length-2]);
+            tour[tour.Length - 1] = startCity;
+            pathLenght += returnValue;
 
             // Yolu ekrana yazdırın
             Console.WriteLine("En kısa yol:");
