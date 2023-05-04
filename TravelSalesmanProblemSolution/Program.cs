@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
 
 namespace TravelSalesmanProblemSolution
 {
@@ -8,60 +8,90 @@ namespace TravelSalesmanProblemSolution
     {
         static void Main(string[] args)
         {
-            Dictionary<string, string[]> dots = new Dictionary<string, string[]>();
+            DateTime baslangicZamani = DateTime.Now;
 
-            List<string> path = new List<string>();
 
-            double pathLength = 0;
-            int yolSayisi = 0;
+            CultureInfo culture = CultureInfo.InvariantCulture;
 
-            string dosya_yolu = @"D:\Üniversite\3.SINIF\2. Dönem\Algoritma Analizi ve Tasarımı\Ödev 1\uygulama dosyaları\5";
+            List<Tuple<double, double>> cities = new List<Tuple<double, double>>();
+
+            //5 124 1000 5915 11849 85900
+            string dosya_yolu = @"D:\Üniversite\3.SINIF\2. Dönem\Algoritma Analizi ve Tasarımı\Ödev 1\uygulama dosyaları\85900";
 
             string[] lines = System.IO.File.ReadAllLines(dosya_yolu);
 
+            double pathLenght = 0;
 
             for (int i = 1; i < lines.Length; i++)
             {
-
                 string[] coordinates = lines[i].Split(" ");
-                dots.Add((i - 1).ToString(), coordinates);
-
+                cities.Add(Tuple.Create(double.Parse(coordinates[0], culture), double.Parse(coordinates[1], culture)));
             }
 
+            int startCity = 0;
 
-            for (int i = 0; i < dots.Count; i++)
+            int[] tour = new int[cities.Count + 1];//en bastaki sehre dondugu icin +1
+            bool[] visited = new bool[cities.Count];
+
+            visited[startCity] = true;
+
+            tour[0] = startCity;
+
+            for (int i = 1; i < cities.Count; i++)
             {
-                string[] coors1;
-                dots.TryGetValue(i.ToString(), out coors1);
+                int nearestCity = -1;
+                double nearestDistance = double.MaxValue;
 
-                string[] coors2;
-                bool isLast = dots.TryGetValue((i + 1).ToString(), out coors2);
-                if (!isLast)
+                for (int j = 0; j < cities.Count; j++)
                 {
-                    Console.WriteLine("bitti");
-                    break;
+                    if (!visited[j])
+                    {
+                        double distance = Distance(cities[i - 1], cities[j]);
+                        if (distance < nearestDistance)
+                        {
+                            nearestDistance = distance;
+                            nearestCity = j;
+                            pathLenght += nearestDistance;
+                        }
 
+                    }
                 }
-                yolSayisi++;
-                pathLength += distanceCalculate(double.Parse(coors1[0]), double.Parse(coors1[1]), double.Parse(coors2[0]), double.Parse(coors2[1]));
+
+                visited[nearestCity] = true;
+                tour[i] = nearestCity;
+
             }
 
-            Console.WriteLine("yol uzunlugu : " + pathLength + " || Yol adedi: " + yolSayisi);
+            //baslangic noktasina dönme
+            double returnValue = Distance(cities[startCity], cities[tour.Length - 2]);
+            tour[tour.Length - 1] = startCity;
+            pathLenght += returnValue;
+
+            // Yolu ekrana yazdırın
+            Console.WriteLine("En kısa yol:");
+            foreach (int city in tour)
+            {
+                Console.Write(city + " ");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Yolun Uzunluğu " + pathLenght);
+
+            DateTime bitisZamani = DateTime.Now;
+            TimeSpan calismaSuresi = bitisZamani - baslangicZamani;
+            Console.WriteLine("Program çalışma süresi: " + calismaSuresi.TotalSeconds + " saniye");
+
+            // Programın sonunda beklemek için bir tuşa basılmasını isteyin
+            Console.WriteLine("Çıkmak için herhangi bir tuşa basın...");
             Console.ReadKey();
-        }//main
 
+        }
 
-
-
-
-
-        private static double distanceCalculate(double x1, double y1, double x2, double y2)
+        static double Distance(Tuple<double, double> point1, Tuple<double, double> point2)
         {
-            double distance = 0f;
+            double dx = point1.Item1 - point2.Item1;
+            double dy = point1.Item2 - point2.Item2;
+            return Math.Sqrt(dx * dx + dy * dy);
 
-            distance = Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2));
-
-            return distance;
         }
 
 
